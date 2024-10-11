@@ -5,6 +5,8 @@ import bodyParser from 'body-parser'
 import path from 'path'
 import dotenv from 'dotenv'
 import http from 'http'
+import { userRoutes } from './routes/userRoutes'
+import { authRoutes } from './routes/authRoutes'
 
 dotenv.config()
 
@@ -16,6 +18,9 @@ app.use(cors({
     credentials:true
 }))
 app.use(bodyParser.json());
+app.use('/api/user',userRoutes)
+app.use('/api/auth',authRoutes)
+
 
 const dbUrl: string = process.env.DB_URL || " ";
 const port: number = parseInt(process.env.PORT || "3200");

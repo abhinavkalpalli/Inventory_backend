@@ -8,6 +8,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const cors_1 = __importDefault(require("cors"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const userRoutes_1 = require("./routes/userRoutes");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
@@ -17,6 +18,7 @@ app.use((0, cors_1.default)({
     credentials: true
 }));
 app.use(body_parser_1.default.json());
+app.use('/api/user', userRoutes_1.userRoutes);
 const dbUrl = process.env.DB_URL || " ";
 const port = parseInt(process.env.PORT || "3200");
 mongoose_1.default.connect(dbUrl)
