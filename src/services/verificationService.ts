@@ -1,5 +1,5 @@
 // src/services/patient/verificationService.ts
-import nodemailer from 'nodemailer'
+import nodemailer from "nodemailer";
 import otpGenerator from "otp-generator";
 import { IverificationService } from "./interfaces/IverificationService";
 import dotenv from "dotenv";
@@ -7,7 +7,6 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export default class verificationService implements IverificationService {
- 
   private transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -44,10 +43,10 @@ export default class verificationService implements IverificationService {
       from: process.env.USER_MAIL!,
       to,
       subject,
-      text: 'Here is your sales report.', // Fallback text version
-      html: salesReport, // Use the formatted sales report HTML
+      text: "Here is your sales report.",
+      html: salesReport,
     };
-  
+
     try {
       await this.transporter.sendMail(mailOptions);
     } catch (error) {

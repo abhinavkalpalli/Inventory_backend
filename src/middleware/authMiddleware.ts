@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
-import Users,{User} from '../models/userModel'
-import dotenv from 'dotenv';
+import Users, { User } from "../models/userModel";
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -15,11 +15,10 @@ type auth = User;
 declare global {
   namespace Express {
     interface Request {
-      user?: auth
+      user?: auth;
     }
   }
 }
-
 
 const verifyUser = (decodedToken: DecodedToken): Promise<User | null> => {
   return new Promise((resolve, reject) => {
@@ -37,7 +36,7 @@ const renewAccessToken = (userId: string): Promise<string> => {
     jwt.sign(
       { userId: userId },
       process.env.JWT_KEY_SECRET as string,
-      { expiresIn: '1h' },
+      { expiresIn: "1h" },
       (err, token) => {
         if (err) {
           reject(err);
@@ -49,11 +48,18 @@ const renewAccessToken = (userId: string): Promise<string> => {
   });
 };
 
-export const protect = async (req: Request, res: Response, next: NextFunction) => {
+export const protect = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   if (req.headers.authorization) {
     try {
       const accessToken = req.headers.authorization;
-      const decoded = jwt.verify(accessToken, process.env.JWT_KEY_SECRET as string) as DecodedToken;
+      const decoded = jwt.verify(
+        accessToken,
+        process.env.JWT_KEY_SECRET as string
+      ) as DecodedToken;
 
       verifyUser(decoded)
         .then((user) => {
@@ -77,7 +83,7 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
           }
         })
         .catch((error) => {
-          console.log('Database error:', error);
+          console.log("Database error:", error);
           res.status(500).json({
             message: "Internal Server Error",
             status: 500,
@@ -86,7 +92,7 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
           });
         });
     } catch (e) {
-      console.log('Token verification error:', e);
+      console.log("Token verification error:", e);
       res.status(401).json({
         message: "User not authorized",
         status: 401,
@@ -103,8 +109,6 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
-
-
 export const refreshAccessToken = (req: Request, res: Response) => {
   if (req.headers.authorization) {
     const refreshToken = req.headers.authorization;
@@ -117,13 +121,14 @@ export const refreshAccessToken = (req: Request, res: Response) => {
 
       verifyUser(decodedRefreshToken)
         .then(async (user) => {
-            const newAccessToken = await renewAccessToken(
-              decodedRefreshToken?.userId as string)
-            
-            res.status(200).send({ newToken: newAccessToken })
+          const newAccessToken = await renewAccessToken(
+            decodedRefreshToken?.userId as string
+          );
+
+          res.status(200).send({ newToken: newAccessToken });
         })
         .catch((error) => {
-          console.error('Error finding user:', error);
+          console.error("Error finding user:", error);
           res.status(401).json({
             message: "User not authorized",
             status: 401,
@@ -131,10 +136,9 @@ export const refreshAccessToken = (req: Request, res: Response) => {
             error,
           });
         });
-
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
-        console.error('Refresh token expired:', error.expiredAt);
+        console.error("Refresh token expired:", error.expiredAt);
         res.status(401).json({
           message: "Refresh token expired",
           status: 401,
@@ -142,7 +146,7 @@ export const refreshAccessToken = (req: Request, res: Response) => {
           expiredAt: error.expiredAt,
         });
       } else if (error instanceof jwt.JsonWebTokenError) {
-        console.error('Invalid token:', error.message);
+        console.error("Invalid token:", error.message);
         res.status(401).json({
           message: "Invalid token",
           status: 401,
@@ -150,12 +154,12 @@ export const refreshAccessToken = (req: Request, res: Response) => {
           error: error.message,
         });
       } else {
-        console.error('Error decoding refresh token:', error);
+        console.error("Error decoding refresh token:", error);
         res.status(401).json({
           message: "Invalid or expired refresh token",
           status: 401,
           error_code: "INVALID_TOKEN",
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: error instanceof Error ? error.message : "Unknown error",
         });
       }
     }

@@ -6,7 +6,6 @@ import verificationService from "../services/verificationService";
 import generateJwt, { Payload } from "../middleware/jwt";
 import { ObjectId } from "mongodb";
 
-
 export default class userController implements IuserController {
   private _userService: userService;
   private _verificationService: verificationService;
@@ -146,44 +145,44 @@ export default class userController implements IuserController {
     }
   }
   async sellProduct(req: Request, res: Response, next: NextFunction) {
-      try {
-        const {productId,quantity,customerId,date,totalPrice}=req.body
-        const data={productId,quantity,customerId,date,totalPrice}
-        const sale= await this._userService.sellProduct(data)
-        return res.status(200).json({
-            message:'Item sold'
-          });
-      } catch (error) {
+    try {
+      const { productId, quantity, customerId, date, totalPrice } = req.body;
+      const data = { productId, quantity, customerId, date, totalPrice };
+      const sale = await this._userService.sellProduct(data);
+      return res.status(200).json({
+        message: "Item sold",
+      });
+    } catch (error) {
       return res.status(500).json({ message: "Internal Error" });
-
-      }
+    }
   }
-  async editProduct(req: Request, res: Response, next: NextFunction){
-      try {
-        const {_id,name,quantity,image,description}=req.body
-        const data={_id,name,quantity,image,description}
-        const product=await this._userService.editProduct(data)
-        return res.status(200).json({
-            message:'Product Updated',
-            product
-          });
-      } catch (error) {
-        return res.status(500).json({ message: "Internal Error" });
-      }
+  async editProduct(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { _id, name, quantity, image, description } = req.body;
+      const data = { _id, name, quantity, image, description };
+      const product = await this._userService.editProduct(data);
+      return res.status(200).json({
+        message: "Product Updated",
+        product,
+      });
+    } catch (error) {
+      return res.status(500).json({ message: "Internal Error" });
+    }
   }
   async getSalesReport(req: Request, res: Response, next: NextFunction) {
     try {
       const { date, productId, customerId } = req.query;
-  
-      // Convert productId and customerId to ObjectId if they are strings
+
       const data = {
         date: date as string | undefined,
-        productId: typeof productId === 'string' ? new ObjectId(productId) : undefined,
-        customerId: typeof customerId === 'string' ? new ObjectId(customerId) : undefined,
+        productId:
+          typeof productId === "string" ? new ObjectId(productId) : undefined,
+        customerId:
+          typeof customerId === "string" ? new ObjectId(customerId) : undefined,
       };
       const report = await this._userService.getsalesReport(data);
-  
-      return res.status(200).json({ message: 'Report Fetched', report });
+
+      return res.status(200).json({ message: "Report Fetched", report });
     } catch (error) {
       return res.status(500).json({ message: "Internal Error" });
     }
@@ -192,14 +191,16 @@ export default class userController implements IuserController {
     try {
       const { email, salesReport } = req.body;
 
-      // Prepare subject and HTML content for the sales report
-      const subject = 'Sales Report';
-      const salesReportContent = this.formatSalesReport(salesReport); // Format your report data for email
+      const subject = "Sales Report";
+      const salesReportContent = this.formatSalesReport(salesReport);
 
-      // Call the method to send email
-      await this._verificationService.SendReportEmail(email, subject, salesReportContent);
+      await this._verificationService.SendReportEmail(
+        email,
+        subject,
+        salesReportContent
+      );
 
-      return res.status(200).json({ message: 'Email sent successfully!' });
+      return res.status(200).json({ message: "Email sent successfully!" });
     } catch (error) {
       console.error("Error sending email:", error);
       return res.status(500).json({ message: "Internal Error" });
@@ -207,11 +208,10 @@ export default class userController implements IuserController {
   }
 
   private formatSalesReport(salesReport: any): string {
-    // Convert sales report data into a string or HTML format
-    // Example: Create a simple HTML table or text summary
-    let reportHTML = '<h3>Your Sales Report</h3>';
-    reportHTML += '<table border="1"><tr><th>Date</th><th>Product</th><th>Customer</th><th>Quantity</th><th>Total</th></tr>';
-    
+    let reportHTML = "<h3>Your Sales Report</h3>";
+    reportHTML +=
+      '<table border="1"><tr><th>Date</th><th>Product</th><th>Customer</th><th>Quantity</th><th>Total</th></tr>';
+
     salesReport.forEach((report: any) => {
       reportHTML += `<tr>
         <td>${new Date(report.date).toLocaleDateString()}</td>
@@ -221,62 +221,51 @@ export default class userController implements IuserController {
         <td>${report.totalPrice}</td>
       </tr>`;
     });
-    reportHTML += '</table>';
+    reportHTML += "</table>";
     return reportHTML; // Return formatted HTML report
   }
   async forgotPassword(req: Request, res: Response, next: NextFunction) {
     try {
-        const {email}=req.body
-        const user=await this._userService.forgotPassword(email)
-        if(user){
-          const otp=await this._verificationService.generateOtp()
-          const data = await this._verificationService.SendOtpEmail(
-            email,
-            "This is for your forgot password",
-            otp
-          );
-          return res
-            .status(200)
-            .json({ message: "otp sent", email, otp});
-  
-        }
-        return res.status(404).json({ message: "User do not exist" });
+      const { email } = req.body;
+      const user = await this._userService.forgotPassword(email);
+      if (user) {
+        const otp = await this._verificationService.generateOtp();
+        const data = await this._verificationService.SendOtpEmail(
+          email,
+          "This is for your forgot password",
+          otp
+        );
+        return res.status(200).json({ message: "otp sent", email, otp });
+      }
+      return res.status(404).json({ message: "User do not exist" });
     } catch (error) {
       return res.status(500).json({ message: "Internal Error" });
-
     }
   }
   async passwordReset(req: Request, res: Response, next: NextFunction) {
     try {
-      const {email,password}=req.body
+      const { email, password } = req.body;
       const hashedPassword = await bcrypt.hash(password, 10);
-      
-      const data=await this._userService.passwordReset(email,hashedPassword)
-      if(data){
-        return res
-      .status(200)
-      .json({ message: "Password Changed"});
+
+      const data = await this._userService.passwordReset(email, hashedPassword);
+      if (data) {
+        return res.status(200).json({ message: "Password Changed" });
       }
-      return res.status(500).json({ message: "Internal Error" }); 
-      
+      return res.status(500).json({ message: "Internal Error" });
     } catch (error) {
-      return res.status(500).json({ message: "Internal Error" }); 
+      return res.status(500).json({ message: "Internal Error" });
     }
   }
   async deleteProduct(req: Request, res: Response, next: NextFunction) {
     try {
-        const {productId}=req.body
-        const data=await this._userService.deleteProduct(productId)
-        if(data){
-          return res
-          .status(200)
-          .json({ message: "Product deleted"});
-        }
-      return res.status(500).json({ message: "Internal Error" }); 
+      const { productId } = req.body;
+      const data = await this._userService.deleteProduct(productId);
+      if (data) {
+        return res.status(200).json({ message: "Product deleted" });
+      }
+      return res.status(500).json({ message: "Internal Error" });
     } catch (error) {
-      return res.status(500).json({ message: "Internal Error" }); 
-      
+      return res.status(500).json({ message: "Internal Error" });
     }
   }
 }
-

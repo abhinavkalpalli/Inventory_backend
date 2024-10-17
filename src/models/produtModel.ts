@@ -6,7 +6,7 @@ export interface Product extends Document {
   quantity: number;
   image: string;
   price: number;
-  isListed:boolean
+  isListed: boolean;
 }
 export default model<Product>(
   "Products",
@@ -17,7 +17,7 @@ export default model<Product>(
       quantity: { type: Number, required: true },
       image: { type: String, required: true },
       price: { type: Number, required: true },
-      isListed:{type:Boolean,default:true}
+      isListed: { type: Boolean, default: true },
     },
     { timestamps: true }
   )

@@ -1,5 +1,5 @@
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 dotenv.config();
 
 export interface Payload {
@@ -13,8 +13,8 @@ interface Tokens {
   refreshToken: string;
 }
 
-const REFRESH_TOKEN_EXPIRATION = '7d'; // Set to 7 days or according to your policy
-const ACCESS_TOKEN_EXPIRATION = '1hr'; // Set to 1 hour or according to your policy
+const REFRESH_TOKEN_EXPIRATION = "7d"; // Set to 7 days or according to your policy
+const ACCESS_TOKEN_EXPIRATION = "1hr"; // Set to 1 hour or according to your policy
 
 const generateRefreshToken = (payload: Payload): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -39,7 +39,7 @@ const generateRefreshToken = (payload: Payload): Promise<string> => {
 const generateJwt = (data: Payload): Promise<Tokens> => {
   return new Promise((resolve, reject) => {
     try {
-      const tokens: Tokens = { accessToken: '', refreshToken: '' };
+      const tokens: Tokens = { accessToken: "", refreshToken: "" };
       const payload: Payload = {};
 
       if (data._id) {
@@ -64,14 +64,16 @@ const generateJwt = (data: Payload): Promise<Tokens> => {
                 resolve(tokens);
               })
               .catch((err) => {
-                reject(new Error(`Error generating refresh token: ${err.message}`));
+                reject(
+                  new Error(`Error generating refresh token: ${err.message}`)
+                );
               });
           }
         }
       );
     } catch (error) {
-      console.error('Error generating JWT:', error);
-      reject(new Error('Error generating JWT'));
+      console.error("Error generating JWT:", error);
+      reject(new Error("Error generating JWT"));
     }
   });
 };
